@@ -20,19 +20,32 @@ package org.apache.skywalking.apm.plugin.asf.dubbo;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import org.apache.skywalking.apm.agent.core.plugin.WitnessMethod;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.ConstructorInterceptPoint;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.InstanceMethodsInterceptPoint;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassInstanceMethodsEnhancePluginDefine;
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
 import org.apache.skywalking.apm.agent.core.plugin.match.NameMatch;
 
+import java.util.Collections;
+import java.util.List;
+
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.returns;
 
 public class DubboInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
     private static final String ENHANCE_CLASS = "org.apache.dubbo.monitor.support.MonitorFilter";
 
     private static final String INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.asf.dubbo.DubboInterceptor";
+
+    private static final String CONTEXT_TYPE_NAME = "org.apache.dubbo.rpc.RpcContext";
+
+    private static final String URL_TYPE_NAME = "org.apache.dubbo.common.URL";
+
+    private static final String GET_SERVER_CONTEXT_METHOD_NAME = "getServerContext";
+
+    private static final String GET_METHOD_PARAMETERS_METHOD_NAME = "getMethodParameters";
 
     @Override
     protected ClassMatch enhanceClass() {
@@ -46,23 +59,36 @@ public class DubboInstrumentation extends ClassInstanceMethodsEnhancePluginDefin
 
     @Override
     public InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
-        return new InstanceMethodsInterceptPoint[] {
-            new InstanceMethodsInterceptPoint() {
-                @Override
-                public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("invoke");
-                }
+        return new InstanceMethodsInterceptPoint[]{
+                new InstanceMethodsInterceptPoint() {
+                    @Override
+                    public ElementMatcher<MethodDescription> getMethodsMatcher() {
+                        return named("invoke");
+                    }
 
-                @Override
-                public String getMethodsInterceptor() {
-                    return INTERCEPT_CLASS;
-                }
+                    @Override
+                    public String getMethodsInterceptor() {
+                        return INTERCEPT_CLASS;
+                    }
 
-                @Override
-                public boolean isOverrideArgs() {
-                    return false;
+                    @Override
+                    public boolean isOverrideArgs() {
+                        return false;
+                    }
                 }
-            }
         };
     }
+
+    // @Override
+    // protected String[] witnessClasses() {
+    //     return new String[]{"org.apache.dubbo.remoting.p2p.support.ServerPeer", "org.apache.dubbo.rpc.filter.ConsumerContextFilter"};
+    // }
+
+    @Override
+    protected List<WitnessMethod> witnessMethods() {
+        return Collections.singletonList(new WitnessMethod(
+                "org.apache.dubbo.rpc.RpcContext",
+                named("getServerContext").and(returns(named("org.apache.dubbo.rpc.RpcContext")))));
+    }
+
 }

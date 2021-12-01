@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package org.apache.skywalking.apm.plugin.asf.dubbo.patch;
+package org.apache.skywalking.apm.plugin.asf.dubbo3.patch;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -47,7 +47,9 @@ public class WrapperInstrumentation extends ClassStaticMethodsEnhancePluginDefin
 
     private static final String GET_SERVER_CONTEXT_METHOD_NAME = "getServerContext";
 
-    private static final String GET_METHOD_PARAMETERS_METHOD_NAME = "getMethodParameters";
+    private static final String GET_SIDE_METHOD_NAME = "getSide";
+
+    private static final String CONTEXT_ATTACHMENT_TYPE_NAME = "org.apache.dubbo.rpc.RpcContextAttachment";
 
     @Override
     public StaticMethodsInterceptPoint[] getStaticMethodsInterceptPoints() {
@@ -60,7 +62,7 @@ public class WrapperInstrumentation extends ClassStaticMethodsEnhancePluginDefin
 
                     @Override
                     public String getMethodsInterceptor() {
-                        return "org.apache.skywalking.apm.plugin.asf.dubbo.patch.MakeWrapperInterceptor";
+                        return "org.apache.skywalking.apm.plugin.asf.dubbo3.patch.MakeWrapperInterceptor";
                     }
 
                     @Override
@@ -78,14 +80,14 @@ public class WrapperInstrumentation extends ClassStaticMethodsEnhancePluginDefin
 
     // @Override
     // protected String[] witnessClasses() {
-    //     return new String[]{"org.apache.dubbo.remoting.p2p.support.ServerPeer", "org.apache.dubbo.rpc.filter.ConsumerContextFilter"};
+    //     return new String[]{"org.apache.dubbo.config.bootstrap.DubboBootstrap"};
     // }
 
     @Override
     protected List<WitnessMethod> witnessMethods() {
         return Collections.singletonList(new WitnessMethod(
                 "org.apache.dubbo.rpc.RpcContext",
-                named("getServerContext").and(returns(named("org.apache.dubbo.rpc.RpcContext")))));
+                named("getServerContext").and(returns(named("org.apache.dubbo.rpc.RpcContextAttachment")))));
     }
 
 }
