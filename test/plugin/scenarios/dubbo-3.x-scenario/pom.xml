@@ -60,6 +60,12 @@
             <artifactId>dubbo</artifactId>
             <version>${test.framework.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-dependencies-zookeeper</artifactId>
+            <version>${test.framework.version}</version>
+            <type>pom</type>
+        </dependency>
     </dependencies>
 
     <build>

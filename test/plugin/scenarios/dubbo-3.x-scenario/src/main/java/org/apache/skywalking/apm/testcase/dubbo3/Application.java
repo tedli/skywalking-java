@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Configuration;
 public class Application {
 
     public static void main(String[] args) {
+        new EmbeddedZooKeeper(62181, false).start();
         SpringApplication.run(Application.class, args);
     }
 
@@ -42,7 +43,7 @@ public class Application {
 
         private ApplicationConfig applicationConfig = new ApplicationConfig(Application.class.getSimpleName());
 
-        private RegistryConfig registryConfig = new RegistryConfig("N/A");
+        private RegistryConfig registryConfig = new RegistryConfig("zookeeper://127.0.0.1:62181");
 
         private ProtocolConfig protocolConfig = new ProtocolConfig("dubbo", 20080);
 
