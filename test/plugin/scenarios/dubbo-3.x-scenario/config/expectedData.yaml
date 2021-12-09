@@ -34,7 +34,7 @@ segmentItems:
               - {key: url, value: not null}
               - {key: arguments, value: helloWorld}
             refs:
-              - {parentEndpoint: GET:/dubbo-3.x-scenario/case/dubbo, networkAddress: 'localhost:20080',
+              - {parentEndpoint: GET:/dubbo-3.x-scenario/case/dubbo, networkAddress: not null,
                  refType: CrossProcess, parentSpanId: 1, parentTraceSegmentId: not null,
                  parentServiceInstance: not null, parentService: dubbo-3.x-scenario, traceId: not null}
             skipAnalysis: 'false'
@@ -49,9 +49,9 @@ segmentItems:
             componentId: 3
             isError: false
             spanType: Exit
-            peer: localhost:20080
+            peer: not null
             tags:
-              - {key: url, value: 'dubbo://localhost:20080/org.apache.skywalking.apm.testcase.dubbo3.services.GreetService.doBusiness(String)'}
+              - {key: url, value: not null}
               - {key: arguments, value: helloWorld}
             skipAnalysis: 'false'
           - operationName: GET:/dubbo-3.x-scenario/case/dubbo
