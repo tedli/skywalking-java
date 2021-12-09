@@ -63,8 +63,8 @@ public class DubboInterceptor implements InstanceMethodsAroundInterceptor {
         Invoker invoker = (Invoker) allArguments[0];
         Invocation invocation = (Invocation) allArguments[1];
 
-        boolean isConsumer = false;
         RpcServiceContext serviceContext = RpcContext.getServiceContext();
+        boolean isConsumer;
         URL url = serviceContext.getUrl();
         if (url == null) {
             url = serviceContext.getConsumerUrl();
@@ -74,10 +74,7 @@ public class DubboInterceptor implements InstanceMethodsAroundInterceptor {
         }
 
         RpcContextAttachment attachment = isConsumer ? RpcContext.getClientAttachment() : RpcContext.getServerAttachment();
-        URL requestURL = url;
-        if (requestURL == null) {
-            requestURL = invoker.getUrl();
-        }
+        URL requestURL = invoker.getUrl();
 
         AbstractSpan span;
 

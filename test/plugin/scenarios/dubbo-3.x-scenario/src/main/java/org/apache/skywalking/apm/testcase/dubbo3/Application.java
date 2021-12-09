@@ -23,6 +23,7 @@ import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.ServiceConfig;
+import org.apache.dubbo.rpc.model.ApplicationModel;
 import org.apache.skywalking.apm.testcase.dubbo3.services.GreetService;
 import org.apache.skywalking.apm.testcase.dubbo3.services.impl.GreetServiceImpl;
 import org.springframework.boot.SpringApplication;
@@ -34,7 +35,7 @@ import org.springframework.context.annotation.Configuration;
 public class Application {
 
     public static void main(String[] args) {
-        new EmbeddedZooKeeper(62181, false).start();
+        new EmbeddedZooKeeper(2181, false).start();
         SpringApplication.run(Application.class, args);
     }
 
@@ -43,14 +44,17 @@ public class Application {
 
         private ApplicationConfig applicationConfig = new ApplicationConfig(Application.class.getSimpleName());
 
-        private RegistryConfig registryConfig = new RegistryConfig("zookeeper://127.0.0.1:62181");
+        private RegistryConfig registryConfig = new RegistryConfig("zookeeper://127.0.0.1:2181");
 
         private ProtocolConfig protocolConfig = new ProtocolConfig("dubbo", 20080);
+
+        public DubboConfiguration() {
+            ApplicationModel.getConfigManager().setApplication(applicationConfig);
+        }
 
         @Bean(destroyMethod = "unexport")
         public ServiceConfig<GreetService> service() {
             ServiceConfig<GreetService> serviceConfig = new ServiceConfig<>();
-            serviceConfig.setApplication(applicationConfig);
             serviceConfig.setRegistry(registryConfig);
             serviceConfig.setProtocol(protocolConfig);
             serviceConfig.setInterface(GreetService.class);
@@ -63,12 +67,11 @@ public class Application {
         @Bean(destroyMethod = "destroy")
         public ReferenceConfig<GreetService> reference() {
             ReferenceConfig<GreetService> referenceConfig = new ReferenceConfig<>();
-            referenceConfig.setApplication(applicationConfig);
-
+            referenceConfig.setRegistry(registryConfig);
             referenceConfig.setInterface(GreetService.class);
-            referenceConfig.setUrl("dubbo://localhost:20080");
-
+            referenceConfig.setScope("remote");
             return referenceConfig;
         }
     }
+
 }

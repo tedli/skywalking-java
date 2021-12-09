@@ -33,25 +33,31 @@ import java.util.List;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.returns;
 
-public class DubboInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
+public class DubboInstrumentationBase extends ClassInstanceMethodsEnhancePluginDefine {
 
-    private static final String ENHANCE_CLASS = "org.apache.dubbo.monitor.support.MonitorFilter";
+    public static final String PROVIDER_ENHANCE_CLASS = "org.apache.dubbo.monitor.support.MonitorFilter";
 
-    private static final String INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.asf.dubbo3.DubboInterceptor";
+    public static final String CONSUMER_ENHANCE_CLASS = "org.apache.dubbo.monitor.support.MonitorClusterFilter";
 
-    private static final String CONTEXT_TYPE_NAME = "org.apache.dubbo.rpc.RpcContext";
+    public static final String INTERCEPT_POINT_METHOD = "invoke";
 
-    private static final String URL_TYPE_NAME = "org.apache.dubbo.common.URL";
+    public static final String INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.asf.dubbo3.DubboInterceptor";
 
-    private static final String GET_SERVER_CONTEXT_METHOD_NAME = "getServerContext";
+    public static final String CONTEXT_TYPE_NAME = "org.apache.dubbo.rpc.RpcContext";
 
-    private static final String GET_SIDE_METHOD_NAME = "getSide";
+    public static final String GET_SERVER_CONTEXT_METHOD_NAME = "getServerContext";
 
-    private static final String CONTEXT_ATTACHMENT_TYPE_NAME = "org.apache.dubbo.rpc.RpcContextAttachment";
+    public static final String CONTEXT_ATTACHMENT_TYPE_NAME = "org.apache.dubbo.rpc.RpcContextAttachment";
+
+    private final String enhanceClassName;
+
+    public DubboInstrumentationBase(String enhanceClassName) {
+        this.enhanceClassName = enhanceClassName;
+    }
 
     @Override
     protected ClassMatch enhanceClass() {
-        return NameMatch.byName(ENHANCE_CLASS);
+        return NameMatch.byName(enhanceClassName);
     }
 
     @Override
@@ -65,7 +71,7 @@ public class DubboInstrumentation extends ClassInstanceMethodsEnhancePluginDefin
                 new InstanceMethodsInterceptPoint() {
                     @Override
                     public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                        return named("invoke");
+                        return named(INTERCEPT_POINT_METHOD);
                     }
 
                     @Override
@@ -81,16 +87,12 @@ public class DubboInstrumentation extends ClassInstanceMethodsEnhancePluginDefin
         };
     }
 
-    // @Override
-    // protected String[] witnessClasses() {
-    //     return new String[]{"org.apache.dubbo.config.bootstrap.DubboBootstrap"};
-    // }
-
     @Override
     protected List<WitnessMethod> witnessMethods() {
-        return Collections.singletonList(new WitnessMethod(
-                "org.apache.dubbo.rpc.RpcContext",
-                named("getServerContext").and(returns(named("org.apache.dubbo.rpc.RpcContextAttachment")))));
+        return Collections.singletonList(
+                new WitnessMethod(CONTEXT_TYPE_NAME,
+                        named(GET_SERVER_CONTEXT_METHOD_NAME).and(
+                                returns(named(CONTEXT_ATTACHMENT_TYPE_NAME)))));
     }
 
 }

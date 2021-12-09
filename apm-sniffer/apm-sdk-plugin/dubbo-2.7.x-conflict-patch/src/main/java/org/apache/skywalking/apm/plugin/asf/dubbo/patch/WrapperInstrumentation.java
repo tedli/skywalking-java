@@ -43,11 +43,7 @@ public class WrapperInstrumentation extends ClassStaticMethodsEnhancePluginDefin
 
     private static final String CONTEXT_TYPE_NAME = "org.apache.dubbo.rpc.RpcContext";
 
-    private static final String URL_TYPE_NAME = "org.apache.dubbo.common.URL";
-
     private static final String GET_SERVER_CONTEXT_METHOD_NAME = "getServerContext";
-
-    private static final String GET_METHOD_PARAMETERS_METHOD_NAME = "getMethodParameters";
 
     @Override
     public StaticMethodsInterceptPoint[] getStaticMethodsInterceptPoints() {
@@ -76,16 +72,12 @@ public class WrapperInstrumentation extends ClassStaticMethodsEnhancePluginDefin
         return byName("org.apache.dubbo.common.bytecode.Wrapper");
     }
 
-    // @Override
-    // protected String[] witnessClasses() {
-    //     return new String[]{"org.apache.dubbo.remoting.p2p.support.ServerPeer", "org.apache.dubbo.rpc.filter.ConsumerContextFilter"};
-    // }
-
     @Override
     protected List<WitnessMethod> witnessMethods() {
         return Collections.singletonList(new WitnessMethod(
-                "org.apache.dubbo.rpc.RpcContext",
-                named("getServerContext").and(returns(named("org.apache.dubbo.rpc.RpcContext")))));
+                CONTEXT_TYPE_NAME,
+                named(GET_SERVER_CONTEXT_METHOD_NAME).and(
+                        returns(named(CONTEXT_TYPE_NAME)))));
     }
 
 }
